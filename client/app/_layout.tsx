@@ -3,10 +3,10 @@ import { StatusBar } from "expo-status-bar";
 import{GestureHandlerRootView} from 'react-native-gesture-handler'
 
 
-SplashScreen.preventAutoHideAsync();
+
 function AuthGuard(){
   const { isSigneedIn } = {isSigneedIn: false}
-  if(isSigneedIn){
+  if(!isSigneedIn){
     return<Redirect href="/(auth)"/>
   }
   else if (isSigneedIn){
