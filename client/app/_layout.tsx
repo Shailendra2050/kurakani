@@ -5,12 +5,12 @@ import{GestureHandlerRootView} from 'react-native-gesture-handler'
 
 
 function AuthGuard(){
-  const { isSigneedIn } = {isSigneedIn: false}
+  const { isSigneedIn } = {isSigneedIn: true};
   if(!isSigneedIn){
-    return<Redirect href="/(auth)"/>
+    return <Redirect href="/(auth)" />
   }
   else if (isSigneedIn){
-    return<Redirect href="/(tabs)"/>
+    return<Redirect href="/(tab)"/>
   }
 }
 export default function RootLayout() {
@@ -18,7 +18,7 @@ export default function RootLayout() {
     <AuthGuard/>
   <Stack screenOptions={{headerShown:false}}>
    <Stack.Screen name="(auth)"/> 
-   <Stack.Screen name="(tabs)"/> 
+   <Stack.Screen name="(tab)"/> 
    <Stack.Screen name="chat/[id]" options={{animation:"slide_from_right"}}/> 
     </Stack>
     <StatusBar style = "dark"/>
