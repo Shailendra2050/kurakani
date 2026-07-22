@@ -46,10 +46,12 @@ export default function AuthScreen() {
                 <Text style = {styles.subheading }>{mode === "login" ? "Sign in to continue" : "Fill in your details to get started" } </Text>
 
                 {/* Form  */}
-                
+
 
             </ScrollView>
-            
+            <Text>
+                
+            </Text>
             
 
         </KeyboardAvoidingView>
