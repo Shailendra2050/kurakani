@@ -1,6 +1,6 @@
 export const Colors = {
     // Primary indigo
-    primary: "#e6761ad8",
+    primary: "#e6761a",
     primaryDim: "#3946a4",
     primaryDeep: "#283593",
     primaryContainer: "#da8414",
