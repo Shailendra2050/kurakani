@@ -7,7 +7,7 @@ const PALETTE = [
   '#1100fd',
   '#33FF57',
   '#3357FF',
-  '#F033FF']
+  '#fffdff']
 
 interface AvatarProps {
   name: string;
@@ -38,7 +38,7 @@ export default function Avatar({name, size =40,online,src}: AvatarProps) {
           width: indicatorSize,
           height : indicatorSize,
           borderRadius :indicatorSize/2,
-          backgroundColor: online ? "#0246ff" : "#F033FF",
+          backgroundColor: online ? "#0aff02" : "#beaec4",
           bottom : 0,
           right : 0
 
