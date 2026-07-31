@@ -57,9 +57,10 @@ export default function MessageScreen() {
 
       {/* search */}
       <View style={styles.searchRow}>
-        <Ionicons name="search" size={25} color= {Colors.outlineVariant} />
+        <Ionicons name="search" size={16} color= {Colors.outlineVariant} />
         <TextInput
           placeholder="Search conversations..."
+          placeholderTextColor={Colors.outlineVariant}
           value={search}
           onChangeText={setSearch}
           style={styles.searchInput}
