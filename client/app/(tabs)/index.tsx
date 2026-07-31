@@ -37,7 +37,7 @@ export default function MessageScreen() {
 
   const openConvo = (c: Conversation) => {
     router.push('/chat/${c._id}')
-  }
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>

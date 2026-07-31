@@ -15,7 +15,7 @@ export default function ConvoItem({ convo, selected, onPress }: ConvoItemProps) 
   const name = convo.participant?.name || "User";
   const avatar = convo.participant?.avatar;
   const online = convo.participant?.isOnline;
-  const sub = '@{convo.participant?.handle}';
+  const sub = '@${convo.participant?.handle}';
   const lastMsg = convo.lastMessage?.text || (convo.lastMessage?.mediaType === "image" ? "Photo" : convo.lastMessage?.mediaUrl ? "Video" : "")
 
 
