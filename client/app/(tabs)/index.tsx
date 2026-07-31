@@ -84,6 +84,7 @@ export default function MessageScreen() {
           <View style = {styles.divider}/>
 
       {/* Conversation list */}
+      
       {loading ? (
         <ActivityIndicator style = {{marginTop: 40}} color = {Colors.primary}/>
       ):(

@@ -14,13 +14,40 @@ export default function search() {
   const[users, setUsers] = useState<IUser[]>([])
   const[loading, setLoading] = useState(false)
   const router = useRouter()
-  const fetchUsers= async () =>{
-    setLoading(true)
-    setTimeout(()=> {
-      setUsers(dummyUsers)
-      setLoading(false)
-    },1000)
-  }
+
+  
+  // const fetchUsers= async () =>{
+  //   setLoading(true)
+  //   setTimeout(()=> {
+  //     setUsers(dummyUsers)
+  //     setLoading(false)
+  //   },1000)
+  // }
+const fetchUsers = async () => {
+  setLoading(true)
+
+  setTimeout(() => {
+    const query = search.trim().toLowerCase()
+
+    const filteredUsers = dummyUsers.filter((user) => {
+      if (!query) return true
+
+      return (
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.handle.toLowerCase().includes(query)
+      )
+    })
+
+    setUsers(filteredUsers)
+    setLoading(false)
+  },200 )
+}
+
+
+
+
+
  useEffect(()=>{
   const timer = setTimeout(fetchUsers, 300)
   return ()=> clearTimeout(timer)
@@ -44,7 +71,7 @@ const startChat = async (user : IUser) =>{
       <View style={styles.searchRow}>
         <Ionicons name="search" size={25} color= {Colors.outlineVariant} />
         <TextInput
-          placeholder="Search by name, Email or Handle..."
+          placeholder="Search by Name, Email or Handle..."
           value={search}
           onChangeText={setSearch}
           style={styles.searchInput}
@@ -85,7 +112,8 @@ const startChat = async (user : IUser) =>{
           </TouchableOpacity>
 
         )}
-        ListEmptyComponent={<Text style = {styles.empty}> {search ? "No users found":"Seach for people to chat with"}</Text>}
+        ListEmptyComponent={<Text style = {styles.empty}> 
+        {search ? "No users found":"Seach for people to chat with"}</Text>}
         />
       )}
 
