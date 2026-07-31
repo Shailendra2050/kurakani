@@ -4,7 +4,7 @@ import{GestureHandlerRootView} from 'react-native-gesture-handler'
 
 
 function AuthGuard(){
-  const { isSignedIn } = {isSignedIn: false}; // Replace with your actual authentication logic
+  const { isSignedIn } = {isSignedIn: true}; // Replace with your actual authentication logic
   if(!isSignedIn){
     return <Redirect href="/(auth)" />
   }
