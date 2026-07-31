@@ -36,13 +36,13 @@ export default function MessageScreen() {
 
       <View style={styles.header}>
         <Text style={styles.title}>Conversations</Text>
-        <view style={styles.headerRight}>
+        <View style={styles.headerRight}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>
               {conversations.length}
             </Text>
           </View>
-        </view>
+        </View>
       </View>
 
       {/* search */}
