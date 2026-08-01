@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Conversation, UserStory } from '@/types'
 // import { useRoute } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '@/assets/styles/MessagesScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
-import { FlatList, TextInput} from 'react-native-gesture-handler';
+import { FlatList, TextInput } from 'react-native-gesture-handler';
 import StoriesBar from '@/components/StoriesBar';
 import StoryViewer from '@/components/StoryViewer';
 import ConvoItem from '@/components/Convoitem'
@@ -31,16 +31,18 @@ export default function MessageScreen() {
     fetchConversations()
   }, [])
   const lowerSearch = search.toLocaleLowerCase()
-  const filtered =search ? conversations.filter(
-    (c)=> c.participant?.name.toLowerCase().includes(lowerSearch) || c.participant?.handle.toLocaleLowerCase().includes(lowerSearch)
+  const filtered = search ? conversations.filter(
+    (c) => c.participant?.name.toLowerCase().includes(lowerSearch) || c.participant?.handle.toLocaleLowerCase().includes(lowerSearch)
   ) : conversations;
 
   const openConvo = (c: Conversation) => {
-    router.push('/chat/${c._id}')
+    router.push(`/chat/${c._id}`)
   };
 
   return (
+
     <SafeAreaView style={styles.safe} edges={['top']}>
+
 
       {/* Header */}
 
@@ -57,7 +59,7 @@ export default function MessageScreen() {
 
       {/* search */}
       <View style={styles.searchRow}>
-        <Ionicons name="search" size={16} color= {Colors.outlineVariant} />
+        <Ionicons name="search" size={16} color={Colors.outlineVariant} />
         <TextInput
           placeholder="Search conversations..."
           placeholderTextColor={Colors.outlineVariant}
@@ -67,8 +69,8 @@ export default function MessageScreen() {
         />
         {search.length > 0 && (
           <TouchableOpacity>
-            <Ionicons name="close-circle" size={25} color={Colors.outlineVariant} 
-            onPress={() => setSearch('')} />
+            <Ionicons name="close-circle" size={25} color={Colors.outlineVariant}
+              onPress={() => setSearch('')} />
 
           </TouchableOpacity>
         )}
@@ -77,31 +79,33 @@ export default function MessageScreen() {
       <StoriesBar onViewStory={(us) => setSelectedStory(us)} />
 
 
-        {selectedStory && <StoryViewer userStory={selectedStory} onClose={() => setSelectedStory(null)}/>}
+      {selectedStory && <StoryViewer userStory={selectedStory} onClose={() => setSelectedStory(null)} />}
 
 
       {/* Divider */}
-          <View style = {styles.divider}/>
+      <View style={styles.divider} />
 
       {/* Conversation list */}
-      
+
       {loading ? (
-        <ActivityIndicator style = {{marginTop: 40}} color = {Colors.primary}/>
-      ):(
-        <FlatList 
-        data = {filtered}
-        keyExtractor = {(c) => c._id}
-        contentContainerStyle ={styles.listContent}
-        renderItem = {({item}) => <ConvoItem convo ={item}selected= {true}
-        onPress={() => openConvo(item)}/>}
-        ListEmptyComponent={
-          <View style ={styles.empty}>
-            <Ionicons name='chatbubbles-outline' size = {44} color={Colors.outlineVariant}/>
-            <Text style ={styles.emptyTitle} > No conversation yet</Text>
-            <Text style ={styles.emptySubtitle}> Go to Search to start chatting</Text>
-          </View>
-        } 
-        
+        <ActivityIndicator style={{ marginTop: 40 }} 
+        color={Colors.primary} />
+      ) : (
+        <FlatList
+          data={filtered}
+
+          keyExtractor={(c) => c._id}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (<ConvoItem convo={item} selected={true}
+            onPress={() => openConvo(item)} />)}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Ionicons name='chatbubbles-outline' size={44} color={Colors.outlineVariant} />
+              <Text style={styles.emptyTitle} > No conversation yet</Text>
+              <Text style={styles.emptySubtitle}> Go to Search to start chatting</Text>
+            </View>
+          }
+
         />
       )}
 
