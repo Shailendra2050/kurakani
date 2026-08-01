@@ -9,264 +9,294 @@ import Avatar from '@/components/Avatar';
 import { TextInput } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker'
+import { useRouter } from 'expo-router';
 
 export default function profile() {
 
-  const{auth} = {auth:{user: dummyUserProfile}}
+  const { auth } = { auth: { user: dummyUserProfile } }
   const user = auth.user;
-  const [editMode,setEditMode] =useState(false)
-  const[profileName, setProfileName]= useState(auth.user?.name || "")
-  const[profileHandle, setProfileHandle]= useState(auth.user?.handle || "")
-  const[profileBio, setProfileBio]= useState(auth.user?.bio || "")
+  const [editMode, setEditMode] = useState(false)
+  const [profileName, setProfileName] = useState(auth.user?.name || "")
+  const [profileHandle, setProfileHandle] = useState(auth.user?.handle || "")
+  const [profileBio, setProfileBio] = useState(auth.user?.bio || "")
   // const[avatarUri, setAvatarUri]= useState(null)
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [loading,setLoading]= useState(false)
+  const [loading, setLoading] = useState(false)
 
   // const displayAvatar = avatarUri || user?.avatar
   const displayAvatar = avatarUri ?? user?.avatar;
+  const router = useRouter();
 
 
-  const pickAvatar = async() =>{
-    const {status}= await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const pickAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if(status !== 'granted'){
+    if (status !== 'granted') {
       Alert.alert("Permission needed", "Allow access to your photos to change avatra.");
       return;
 
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      quality:0.8,
-      allowsEditing:true,
-      aspect:[1,1]
+      quality: 0.8,
+      allowsEditing: true,
+      aspect: [1, 1]
     });
-    if(!result.canceled && result.assets[0]){
-      setAvatarUri(result.assets[0].uri)  
+    if (!result.canceled && result.assets[0]) {
+      setAvatarUri(result.assets[0].uri)
     }
 
 
   }
-  const saveProfile=async()=>{
+  const saveProfile = async () => {
     setLoading(true);
-    setTimeout(()=>{
+    setTimeout(() => {
       setEditMode(false)
       setAvatarUri(null)
       setLoading(false)
-    },2000)
+    }, 2000)
 
 
   }
-  const handleLogout= async ()=>{
-    Alert.alert("Sign Out","Are you sure you want to sign out ?",[
-      {text:"Cancle",style:"cancel"},{
-        text:"Sign Out",style:"destructive",onPress:()=>{}
-      }
-    ])
+  const handleLogout = () => {
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            // Replace with your actual sign-out method
+            // await auth.signOut();
 
-  }
+            // Navigate only after sign-out succeeds
+            router.replace("/(auth)");
+          } catch (error) {
+            Alert.alert(
+              "Sign Out Failed",
+              "Unable to sign out. Please try again."
+            );
+          }
+        },
+      },
+    ]);
+  };
+
+  // const handleLogout= async ()=>{
+  //   Alert.alert("Sign Out","Are you sure you want to sign out ?",[
+  //     {text:"Cancle",style:"cancel"},{
+  //       text:"Sign Out",style:"destructive",onPress:()=>{}
+  //     }
+  //   ])
+
+  // }
 
 
 
   return (
-    <SafeAreaView style = {styles.safe} edges={["top"]}>
-      <ScrollView contentContainerStyle ={styles.scroll}>
-       
-       {/* Header */}
-       <View style = {styles.header}>
-        <Text style = {styles.title}>
-          Profile
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView contentContainerStyle={styles.scroll}>
 
-        </Text>
-        {!editMode && (
-          <TouchableOpacity style ={styles.editBtn} onPress={()=> setEditMode(true)}>
-            <Ionicons name="pencil" size={16} color={Colors.primary}/>
-            <Text style = {styles.editBtnText}>Edit</Text>
-          </TouchableOpacity>
-        )}
-       </View>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>
+            Profile
 
-
-       {/* Avatar */}
-
-       <View style= {styles.avatarSection}>
-        <TouchableOpacity onPress={ editMode? pickAvatar:undefined} activeOpacity={editMode? 0.7:1}>
-          <View style ={styles.avatarWrapper}>
-            <Avatar name={user?.name || "?"} src={displayAvatar} size={100}/>
-            {editMode && (
-              <View style = {styles.cameraOverlay}>
-                <Ionicons name='camera' size={22} color='#fff'/>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-       </View>
-       {!editMode &&(
-        <View style = {styles.userInfo}>
-          <Text style = {styles.userName}>{user?.name}</Text>
-          <Text style = {styles.userHandle}>@{user?.handle}</Text>
-          <Text style = {styles.userEmail}>{user?.email}</Text>
-          {user?.bio && 
-          <Text style = {styles.userBio}>{user?.bio}</Text>}
-
+          </Text>
+          {!editMode && (
+            <TouchableOpacity style={styles.editBtn} onPress={() => setEditMode(true)}>
+              <Ionicons name="pencil" size={16} color={Colors.primary} />
+              <Text style={styles.editBtnText}>Edit</Text>
+            </TouchableOpacity>
+          )}
         </View>
-       )}
-
-       
-
-       {/* Edit form */}
-       {editMode &&(
-        <View style = {styles.form}>
-          {/* Name */}
-          <View style ={styles.field}>
-            <Text style= {styles.fieldLabel}>NAME</Text>
-            <TextInput 
-            style ={styles.input}
-            value={profileName}
-            onChangeText={setProfileName}
-            placeholder='Your name'
-            placeholderTextColor={Colors.outlineVariant}
-            autoCapitalize='words'
-            
-            />
-
-          </View>
-
-          {/* Handle */}
-
-          <View style ={styles.field}>
-            <Text style= {styles.fieldLabel}>HANDLE</Text>
-            <View style= {styles.handleRow}>
-              <Text style= {styles.atSign}>@</Text>
-            <TextInput 
-            style ={[styles.input,styles.handleInput]}
-            value={profileHandle}
-            onChangeText={(v)=>setProfileHandle(v.toLocaleLowerCase().replace(/\s/g,""))}
-            placeholder='Username'
-            placeholderTextColor={Colors.outlineVariant}
-            autoCapitalize='none'
-            
-            />
-            </View>
-
-          </View>
-
-          
 
 
-          {/* Bio */}
+        {/* Avatar */}
 
-          <View style ={styles.field}>
-            <Text style= {styles.fieldLabel}>BIO</Text>
-            <TextInput 
-            style ={[styles.input,styles.bioInput]}
-            value={profileBio}
-            onChangeText={setProfileBio}
-            placeholder='Tell us about yourself...'
-            placeholderTextColor={Colors.outlineVariant}
-            multiline numberOfLines={3}
-            
-            />
-
-          </View>
-
-
-          {/* Save button */}
-          <TouchableOpacity onPress={saveProfile} disabled ={loading} style ={styles.saveWrapper} activeOpacity={0.88} > 
-            <LinearGradient colors={[Colors.primary,Colors.primaryContainer]}
-            start={{x:0,y:0}}
-            end={{x:1,y:1}}
-            style ={styles.saveBtn}
-            >
-              {loading?(
-                <ActivityIndicator color={Colors.onPrimary} />
-              ):(
-                <Text style ={styles.saveBtnText}>Save Changes</Text>
+        <View style={styles.avatarSection}>
+          <TouchableOpacity onPress={editMode ? pickAvatar : undefined} activeOpacity={editMode ? 0.7 : 1}>
+            <View style={styles.avatarWrapper}>
+              <Avatar name={user?.name || "?"} src={displayAvatar} size={100} />
+              {editMode && (
+                <View style={styles.cameraOverlay}>
+                  <Ionicons name='camera' size={22} color='#fff' />
+                </View>
               )}
-
-            </LinearGradient>
-
+            </View>
           </TouchableOpacity>
+        </View>
+        {!editMode && (
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>{user?.name}</Text>
+            <Text style={styles.userHandle}>@{user?.handle}</Text>
+            <Text style={styles.userEmail}>{user?.email}</Text>
+            {user?.bio &&
+              <Text style={styles.userBio}>{user?.bio}</Text>}
+
+          </View>
+        )}
 
 
 
-          {/* Cancle Button */}
+        {/* Edit form */}
+        {editMode && (
+          <View style={styles.form}>
+            {/* Name */}
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>NAME</Text>
+              <TextInput
+                style={styles.input}
+                value={profileName}
+                onChangeText={setProfileName}
+                placeholder='Your name'
+                placeholderTextColor={Colors.outlineVariant}
+                autoCapitalize='words'
 
-           <TouchableOpacity
-                   style={styles.cancelBtn}
-                   onPress={() => {
-                     setEditMode(false);
-                     setProfileName(user?.name || "");
-                     setProfileHandle(user?.handle || "");
-                     setProfileBio(user?.bio || "");
-                     setAvatarUri(null);
-                   }}>
-            
-            
-            <Text style ={styles.cancelBtnText}>Cancel</Text>
+              />
 
+            </View>
+
+            {/* Handle */}
+
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>HANDLE</Text>
+              <View style={styles.handleRow}>
+                <Text style={styles.atSign}>@</Text>
+                <TextInput
+                  style={[styles.input, styles.handleInput]}
+                  value={profileHandle}
+                  // onChangeText={(v) => setProfileHandle(v.toLocaleLowerCase().replace(/\s/g, ""))}
+                  onChangeText={(v) => setProfileHandle(v.toLowerCase().replace(/\s/g, "").replace(/^@+/, ""))}
+                  placeholder='Username'
+                  placeholderTextColor={Colors.outlineVariant}
+                  autoCapitalize='none'
+
+                />
+              </View>
+
+            </View>
+
+
+
+
+            {/* Bio */}
+
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>BIO</Text>
+              <TextInput
+                style={[styles.input, styles.bioInput]}
+                value={profileBio}
+                onChangeText={setProfileBio}
+                placeholder='Tell us about yourself...'
+                placeholderTextColor={Colors.outlineVariant}
+                multiline numberOfLines={3}
+
+              />
+
+            </View>
+
+
+            {/* Save button */}
+            <TouchableOpacity onPress={saveProfile} disabled={loading} style={styles.saveWrapper} activeOpacity={0.88} >
+              <LinearGradient colors={[Colors.primary, Colors.primaryContainer]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.saveBtn}
+              >
+                {loading ? (
+                  <ActivityIndicator color={Colors.onPrimary} />
+                ) : (
+                  <Text style={styles.saveBtnText}>Save Changes</Text>
+                )}
+
+              </LinearGradient>
+
+            </TouchableOpacity>
+
+
+
+            {/* Cancle Button */}
+
+            <TouchableOpacity
+              style={styles.cancelBtn}
+              onPress={() => {
+                setEditMode(false);
+                setProfileName(user?.name || "");
+                setProfileHandle(user?.handle || "");
+                setProfileBio(user?.bio || "");
+                setAvatarUri(null);
+              }}>
+
+
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+
+            </TouchableOpacity>
+
+
+
+          </View>
+        )}
+
+        {/* Profile Options */}
+        {!editMode && (
+          <View style={styles.optionsSection}>
+            <TouchableOpacity style={styles.optionRow}>
+              <View style={styles.optionIcon}>
+                <Ionicons name='notifications-outline' size={20} color={Colors.onSurfaceVariant} />
+              </View>
+              <Text style={styles.optionText}>Notifications</Text>
+              <Ionicons name='chevron-forward' size={16} color={Colors.outlineVariant} />
+
+            </TouchableOpacity>
+
+
+
+
+            <TouchableOpacity style={styles.optionRow}>
+              <View style={styles.optionIcon}>
+                <Ionicons name='settings-outline' size={20} color={Colors.onSurfaceVariant} />
+              </View>
+              <Text style={styles.optionText}>Settings</Text>
+              <Ionicons name='chevron-forward' size={16} color={Colors.outlineVariant} />
+
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.optionRow}>
+              <View style={styles.optionIcon}>
+                <Ionicons name='lock-closed-outline' size={20} color={Colors.onSurfaceVariant} />
+              </View>
+              <Text style={styles.optionText}>Privacy & Security</Text>
+              <Ionicons name='chevron-forward' size={16} color={Colors.outlineVariant} />
+
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.optionRow}>
+              <View style={styles.optionIcon}>
+                <Ionicons name='help-circle-outline' size={20} color={Colors.onSurfaceVariant} />
+              </View>
+              <Text style={styles.optionText}>Help & Support</Text>
+              <Ionicons name='chevron-forward' size={16} color={Colors.outlineVariant} />
+
+            </TouchableOpacity>
+
+
+
+
+          </View>
+        )}
+
+        {/* Sign out */}
+        <View style={styles.signOutSection}>
+
+          <TouchableOpacity style={styles.signOutBtn} onPress={handleLogout}>
+            <Ionicons name='log-out-outline' size={18} color={Colors.error} />
+            <Text style={styles.signOutText}>Sign Out</Text>
           </TouchableOpacity>
-
-
 
         </View>
-       )}
-
-       {/* Profile Options */}
-       {!editMode && (
-        <View style = {styles.optionsSection}>
-          <TouchableOpacity  style={styles.optionRow}>
-            <View  style= {styles.optionIcon}>
-              <Ionicons  name='notifications-outline' size={20} color={Colors.onSurfaceVariant}/>
-            </View>
-            <Text style ={styles.optionText}>Notifications</Text>
-            <Ionicons  name='chevron-forward' size={16} color={Colors.outlineVariant}/>
-
-          </TouchableOpacity>
-    
-
-
-
-          <TouchableOpacity  style={styles.optionRow}>
-            <View  style= {styles.optionIcon}>
-              <Ionicons  name='settings-outline' size={20} color={Colors.onSurfaceVariant}/>
-            </View>
-            <Text style ={styles.optionText}>Settings</Text>
-            <Ionicons  name='chevron-forward' size={16} color={Colors.outlineVariant}/>
-
-          </TouchableOpacity>
-
-          <TouchableOpacity  style={styles.optionRow}>
-            <View  style= {styles.optionIcon}>
-              <Ionicons  name='lock-closed-outline' size={20} color={Colors.onSurfaceVariant}/>
-            </View>
-            <Text style ={styles.optionText}>Privacy & Security</Text>
-            <Ionicons  name='chevron-forward' size={16} color={Colors.outlineVariant}/>
-
-          </TouchableOpacity>
-          <TouchableOpacity  style={styles.optionRow}>
-            <View  style= {styles.optionIcon}>
-              <Ionicons  name='help-circle-outline' size={20} color={Colors.onSurfaceVariant}/>
-            </View>
-            <Text style ={styles.optionText}>Help & Support</Text>
-            <Ionicons  name='chevron-forward' size={16} color={Colors.outlineVariant}/>
-
-          </TouchableOpacity>
-
-
-          
-          
-        </View>
-       )}
-
-       {/* Sign out */}
-       <View style={styles.signOutSection}>
-        
-        <TouchableOpacity style={styles.signOutBtn} onPress={handleLogout}>
-          <Ionicons  name='log-out-outline' size={18} color={Colors.error}/>
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </TouchableOpacity>
-
-       </View>
 
 
 
