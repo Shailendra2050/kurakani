@@ -64,8 +64,8 @@ export const styles = StyleSheet.create({
         flex: 1,
         fontSize: 14,
         color: Colors.onSurface,
-        maxHeight: 120,
-        paddingVertical: 6,
+        maxHeight: 50,
+        paddingVertical: 15,
     },
     sendBtn: {
         width: 36,
