@@ -2,8 +2,10 @@ import { StyleSheet } from "react-native";
 import { Colors } from "../../constants/Colors";
 
 export const styles = StyleSheet.create({
-    safe: {flex: 1,
-  backgroundColor: Colors.surface},
+    safe: {
+//         flex: 1,
+//   backgroundColor: Colors.surface},
+    },
     header: {
         flexDirection: "row",
         alignItems: "center",
