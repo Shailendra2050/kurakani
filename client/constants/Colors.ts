@@ -26,6 +26,9 @@
 //     error: "#b41340",
 //     online: "#22c55e",
 // };
+
+
+
 export const Colors = {
     // Primary indigo
     primary: "#4652b0",

@@ -152,7 +152,7 @@ export default function Chatscreen() {
 
 
       {/* main */}
-      <KeyboardAvoidingView style={styles.kav} behavior={Platform.OS === 'ios' ? 'padding' : "height"} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} />
+      <KeyboardAvoidingView style={styles.kav} behavior={Platform.OS === 'ios' ? 'padding' : "height"} keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} >
 
 
       {/* Messages */}
@@ -252,7 +252,7 @@ export default function Chatscreen() {
 
       </View>
 
-
+      </KeyboardAvoidingView>
 
     </SafeAreaView>
   )
