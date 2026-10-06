@@ -4,7 +4,13 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import { clerkMiddleware } from '@clerk/express'
 import userRouter from "./routes/userRoutes.js";
-import messageRouter from "./routes/messageRouters.js";
+import messageRouter from "./routes/messageRoutes.js";
+import storyRouter from "./routes/storyRoutes.js";
+import http from "http"
+import { initSocketServer } from "./socket/socketManager.js";
+
+
+
 
 const app = express();
 
@@ -23,6 +29,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 app.use("/api/users", userRouter);
 app.use("/api/users", messageRouter);
+app.use("/api/users", storyRouter);
 
 
 // Error handler
@@ -31,8 +38,11 @@ app.use((err: any, _res: Request, res: Response, _next: NextFunction)=>{
     res.status(500).json({success: false, message: err?.message || "Something went worng!"});
 })
 
+// HTTP server and attach websocket
+const server = http.createServer(app)
+initSocketServer(server)
 
-app.listen(port, () => {
+server.listen(port, () => {
     // console.log(`Server is running at http://localhost:${port}`);
     console.log(`Server is running at http://0.0.0.0:${port}`);
 });
