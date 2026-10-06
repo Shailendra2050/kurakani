@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import { AuthRequest } from '../middlewares/auth.js';
 import cloudinary from '../config/cloudinary.js';
 import { Readable } from 'stream';
+import { broadcastUserUpdate } from '../socket/socketManager.js';
 
 
 
@@ -104,7 +105,11 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         updateData.avatar = avatarUrl;
 
     }
-    const updated = await User.findByIdAndUpdate(req.user!.id, updateData, { returnDocument: "after" });
+    const updated = await User.findByIdAndUpdate(req.user!.id, updateData, { returnDocument: "after" })
+
+    if(updated){
+        broadcastUserUpdate(updated)
+    }
     res.json({ success: true, user: updated });
 
 }
