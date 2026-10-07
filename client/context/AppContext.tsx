@@ -54,6 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const [conversations, setConversations] = useState<Conversation[]>([])
 
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
+    const selectedConversationRef = useRef(selectedConversation)
 
     const [messages, setMessages] = useState<Message[]>([])
     const [userStories, setUserStories] = useState<UserStory[]>([]);
@@ -66,6 +67,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         getTokenRef.current = getToken;
 
     }, [getToken])
+
+    useEffect(() => {
+        selectedConversationRef.current = selectedConversation;
+    }, [selectedConversation])
 
 
     //attach clerk token on every request
@@ -202,8 +207,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                     if (event.type === "message") {
                         const incoming = event.payload as Message;
                         setMessages((prev) => {
-                            if (prev.length > 0 && prev[0].conversationId === incoming.
-                                conversationId) {
+                            if (selectedConversationRef.current?._id === incoming.conversationId) {
                                 return [...prev, incoming]
                             }
                             return prev;
@@ -253,8 +257,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                     if (event.type === "chat_deleted") {
                         const { conversationId } = event;
                         if (conversationId) {
-                            setConversations((prev) => prev.filter((c) => c._id! ==
-                                conversationId));
+                            setConversations((prev) => prev.filter((c) => c._id !== conversationId));
                             setSelectedConversation((prev) => (prev?._id === conversationId ?
                                 null : prev))
                         }

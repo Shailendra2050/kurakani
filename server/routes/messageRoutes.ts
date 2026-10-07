@@ -10,7 +10,7 @@ messageRouter.use(authMiddleware)
 
 
 messageRouter.get('/conversations',getConversation);
-messageRouter.get('/conversations/:conversation/messages',getMessage);
+messageRouter.get('/conversations/:conversationId/messages',getMessage);
 messageRouter.get('/conversations/with/:targetUserId',getorCreateConversation);
 messageRouter.post('/send',upload.single("file"),sendMessage);
 messageRouter.delete('/conversations/:conversationId',deleteConversation);
@@ -71,4 +71,3 @@ export default messageRouter;
 // );
 
 // export default messageRouter;
-
