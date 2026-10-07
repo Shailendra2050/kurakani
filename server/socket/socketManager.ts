@@ -101,7 +101,7 @@ export async function handleConversationEvent(senderId: string, conversationId: 
         const conversation = await Conversation.findById(conversationId)
         if (!conversation) return;
         const payload = JSON.stringify(event);
-        conversation.participats.forEach((pId)=>{
+        conversation.participants.forEach((pId)=>{
             const participantId = String(pId);
             if (participantId === senderId) return;
             //Don't  send back to sender
