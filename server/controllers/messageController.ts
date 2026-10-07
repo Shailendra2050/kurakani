@@ -14,7 +14,7 @@ async function findConversation(userId: string, otherId: string){
                 participants:{ $elemMatch:{ $eq:userId}}
             },
             {
-                participants:{$eleMatch:{$eq: otherId}}
+                participants:{$elemMatch:{$eq: otherId}}
             },
             {$expr: {$eq: [{$size:"$participants"},2]}}
         ]
@@ -26,34 +26,70 @@ export const getorCreateConversation = async (req: AuthRequest, res: Response)=>
     const targetUserId= String(req.params.targetUserId)
     let conversation : any = await findConversation(userId, targetUserId);
     if(conversation){
-        await conversation.populate("participants","name email handl avtar isOnline lastSeen");
+        await conversation.populate("participants","name email handle avatar isOnline lastSeen");
         await conversation.populate("lastMessage")
     }else{
-        conversation = await Conversation.create({participats:[userId,String(targetUserId)]})
-        await conversation.populate("participants","name email handle avtar isOnline lastSeen");
+        conversation = await Conversation.create({participants:[userId,String(targetUserId)]})
+        await conversation.populate("participants","name email handle avatar isOnline lastSeen");
     }
     const other = (conversation.participants as any[]).find((p:any)=> String(p._id !==userId));
     res.json({
         success:true,
-        conversation:{ _id: conversation._id, participant: other, lastMessage:conversation.lastMessage},
+        conversation:{ _id: conversation._id, participants: other, lastMessage:conversation.lastMessage},
     })
 
 }
 
 // get all conversation for the current user
-export const getConversation = async (req: AuthRequest, res: Response)=>{
-    const userId =req.user!.id;
-    const conversations = await Conversation.find({participants:{$in:[userId]}}).populate("participants", "name email handle avtar isOnline lastSeen").populate('lastMessage').sort({updatedAt: -1})
 
-    const shaped = conversations.map((c)=>{
-        const other = (c.participats as any[]).find((p: any)=> String(p._id) !== userId);
-        return { _id: c._id, isGroup: false, participat:other, lastMessage: c.lastMessage, updateAt: c.updateAt}
-        res.json({success: true, conversations: shaped})
+// 
 
+export const getConversation = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user!.id;
 
+    const conversations = await Conversation.find({
+      participants: { $in: [userId] },
     })
-    
-}
+      .populate(
+        "participants",
+        "name email handle avatar isOnline lastSeen"
+      )
+      .populate("lastMessage")
+      .sort({ updatedAt: -1 });
+
+    const shaped = conversations.map((conversation) => {
+      const other = (conversation.participants as any[]).find(
+        (participant: any) =>
+          String(participant._id) !== userId
+      );
+
+      return {
+        _id: conversation._id,
+        isGroup: false,
+        participant: other,
+        lastMessage: conversation.lastMessage,
+        updatedAt: conversation.updatedAt,
+      };
+    });
+
+    return res.json({
+      success: true,
+      conversations: shaped,
+    });
+  } catch (error) {
+    console.error("getConversation error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch conversations",
+    });
+  }
+};
+
 
 // send message 
 export const sendMessage = async (req: AuthRequest, res: Response)=>{
@@ -97,12 +133,12 @@ export const sendMessage = async (req: AuthRequest, res: Response)=>{
 
             let conversation;
             if(conversationId){
-                conversation = await Conversation.findOne({_id:conversationId,participats: {$in:[senderId]}})
+                conversation = await Conversation.findOne({_id:conversationId,participants: {$in:[senderId]}})
             }else{
                 conversation = await findConversation(senderId, recieverId)
                 if (!conversation){
                     conversation = await Conversation.create({
-                        participats: [senderId,recieverId]
+                        participants: [senderId,recieverId]
                     })
                 }
             }if(!conversation){
@@ -111,7 +147,7 @@ export const sendMessage = async (req: AuthRequest, res: Response)=>{
             }
             const message = await Message.create({
                 sender: senderId,
-                receiver: recieverId || conversation.participats.find((p)=> String(p) !== senderId),
+                receiver: recieverId || conversation.participants.find((p)=> String(p) !== senderId),
                 conversationId: conversation._id,
                 text: text?.trim(),
                 mediaUrl: mediaUrl || undefined,
@@ -119,7 +155,7 @@ export const sendMessage = async (req: AuthRequest, res: Response)=>{
 
             })
             conversation.lastMessage = message._id as any ;
-            conversation.updateAt = new Date();
+            conversation.updatedAt = new Date();
             await conversation.save();
             res.status(201).json({success: true, message});
 
@@ -133,13 +169,13 @@ export const getMessage = async (req: AuthRequest, res: Response)=>{
     const {conversationId} = req.params;
 
     const conversation = await Conversation.findOne({
-        _id: conversationId, participats: {$in:[userId]}
+        _id: conversationId, participants: {$in:[userId]}
     })
     if(!conversation){
         res.status(404).json({success: false, message : "Conversation not found"});
         return
     }
-    const message = await Message.find({conversationId}).sort({createAt: 1});
+    const message = await Message.find({conversationId}).sort({createdAt: 1});
     await Message.updateMany({conversationId,receiver: userId, read: false},{read:true})
     res.json({success: true, message});
 
@@ -157,7 +193,7 @@ export const deleteConversation = async (req: AuthRequest, res: Response)=>{
 
         }
         // check if user is part of the conversation 
-        const isparticipant = conversation.participats.some((p)=> String(p) === userId)
+        const isparticipant = conversation.participants.some((p)=> String(p) === userId)
         if(!isparticipant){
             res.status(403).json({ success: false, message: "Not authorized to delete this conversation"});
             return;

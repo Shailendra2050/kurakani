@@ -1,75 +1,71 @@
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import type { User as IUser} from '../../types'
+import type { Conversation, User as IUser } from '../../types'
 import { useRouter } from 'expo-router'
-import { dummyUsers } from '@/assets/assets'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { styles } from '@/assets/styles/SearchScreen.styles'
 import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '@/constants/Colors'
 import Avatar from '@/components/Avatar'
+import { api, useApp } from '@/context/AppContext'
 
 export default function search() {
-  const[search, setSearch] = useState("")
-  const[users, setUsers] = useState<IUser[]>([])
-  const[loading, setLoading] = useState(false)
+  const [search, setSearch] = useState("")
+  const [users, setUsers] = useState<IUser[]>([])
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
-
-  
-  // const fetchUsers= async () =>{
-  //   setLoading(true)
-  //   setTimeout(()=> {
-  //     setUsers(dummyUsers)
-  //     setLoading(false)
-  //   },1000)
-  // }
-const fetchUsers = async () => {
-  setLoading(true)
-
-  setTimeout(() => {
-    const query = search.trim().toLowerCase()
-
-    const filteredUsers = dummyUsers.filter((user) => {
-      if (!query) return true
-
-      return (
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
-        user.handle.toLowerCase().includes(query)
-      )
-    })
-
-    setUsers(filteredUsers)
-    setLoading(false)
-  },200 )
-}
+  const { setConversations, setSelectedConversation } = useApp()
 
 
+  const fetchUsers = async () => {
+    setLoading(true)
 
+    try {
+      const endpoint = search ? `/api/users/search?query=${search}` : "/api/users";
+      const { data } = await api.get<{ success: boolean, users: IUser[] }>
+        (endpoint)
+      if (data.success) setUsers(data.users)
+      setLoading(false)
+    } catch (error) {
+      setTimeout(fetchUsers, 1000)
+    }
+  }
 
+  useEffect(() => {
+    const timer = setTimeout(fetchUsers, 300)
+    return () => clearTimeout(timer)
+  }, [search])
+  const startChat = async (user: IUser) => {
+    try {
+      const { data } = await api.get<{
+        success: boolean; conversation:
+          Conversation
+      }>(`/api/messages/conversations/with/${user._id}`)
+      if (data.success) {
+         setSelectedConversation(data.conversation);
+         setConversations((prev) => (prev.some((c) => c._id === data.      conversation._id) ? prev : [data.conversation, ...prev]))
+        router.push(`/chat/${data.conversation._id}`)
+      }
+            
+    } catch (error) {
+      Alert.alert("Error", "Failed to open conversation");
+    }
+  }
 
- useEffect(()=>{
-  const timer = setTimeout(fetchUsers, 300)
-  return ()=> clearTimeout(timer)
- },[search])
-const startChat = async (user : IUser) =>{
-  router.push(`/chat/${user._id}`)
-
-}
 
 
   return (
-   <SafeAreaView style = {styles.safe } edges={["top"]}>
+    <SafeAreaView style={styles.safe} edges={["top"]}>
 
       {/* Header */}
-     <View style={styles.header}>
+      <View style={styles.header}>
         <Text style={styles.title}>Search</Text>
-      
+
       </View>
 
       {/* search */}
       <View style={styles.searchRow}>
-        <Ionicons name="search" size={25} color= {Colors.outlineVariant} />
+        <Ionicons name="search" size={25} color={Colors.outlineVariant} />
         <TextInput
           placeholder="Search by Name, Email or Handle..."
           value={search}
@@ -80,43 +76,43 @@ const startChat = async (user : IUser) =>{
         />
         {search.length > 0 && (
           <TouchableOpacity>
-            <Ionicons name="close-circle" size={20} color={Colors.outlineVariant} 
-            onPress={() => setSearch('')} />
+            <Ionicons name="close-circle" size={20} color={Colors.outlineVariant}
+              onPress={() => setSearch('')} />
 
           </TouchableOpacity>
         )}
       </View>
 
       {/* Result */}
-      {loading ?(
-        <ActivityIndicator  style ={{marginTop : 40}} color={Colors.primary}/>
-      ):(
+      {loading ? (
+        <ActivityIndicator style={{ marginTop: 40 }} color={Colors.primary} />
+      ) : (
         <FlatList
-        data = {users}
-        keyExtractor={(u) => u._id}
-        contentContainerStyle ={styles.list}
-        renderItem={({item: u})=>(
-          <TouchableOpacity style ={styles.userRow} onPress={()=> startChat(u)}
-          activeOpacity={0.7}>
-            <Avatar name={u.name} src={u.avatar} size={44} online = {u.isOnline}/>
-            <View style = {styles.userInfo}>
-                <View style = {styles.nameRow}>
-                  <Text style = {styles.userName}>{u.name}</Text>
-                  <Text style = {styles.userHandle}>@{u.handle}</Text>
-                  
+          data={users}
+          keyExtractor={(u) => u._id}
+          contentContainerStyle={styles.list}
+          renderItem={({ item: u }) => (
+            <TouchableOpacity style={styles.userRow} onPress={() => startChat(u)}
+              activeOpacity={0.7}>
+              <Avatar name={u.name} src={u.avatar} size={44} online={u.isOnline} />
+              <View style={styles.userInfo}>
+                <View style={styles.nameRow}>
+                  <Text style={styles.userName}>{u.name}</Text>
+                  <Text style={styles.userHandle}>@{u.handle}</Text>
+
 
                 </View>
-                <Text style = {styles.userEmail} numberOfLines={1}>{u.email}</Text>
-            </View>
+                <Text style={styles.userEmail} numberOfLines={1}>{u.email}</Text>
+              </View>
 
-          </TouchableOpacity>
+            </TouchableOpacity>
 
-        )}
-        ListEmptyComponent={<Text style = {styles.empty}> 
-        {search ? "No users found":"Seach for people to chat with"}</Text>}
+          )}
+          ListEmptyComponent={<Text style={styles.empty}>
+            {search ? "No users found" : "Seach for people to chat with"}</Text>}
         />
       )}
 
-   </SafeAreaView>
+    </SafeAreaView>
   )
 }

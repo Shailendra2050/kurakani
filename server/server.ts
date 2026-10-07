@@ -27,10 +27,10 @@ const port = process.env.PORT || 3000;
 app.get('/', (req: Request, res: Response) => {
     res.send('Server is Live!');
 });
-app.use("/api/users", userRouter);
-app.use("/api/users", messageRouter);
-app.use("/api/users", storyRouter);
 
+app.use("/api/users", userRouter);
+app.use("/api/messages", messageRouter);
+app.use("/api/stories", storyRouter);
 
 // Error handler
 app.use((err: any, _res: Request, res: Response, _next: NextFunction)=>{

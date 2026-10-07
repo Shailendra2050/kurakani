@@ -1,8 +1,6 @@
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Conversation, UserStory } from '@/types'
-// import { useRoute } from '@react-navigation/native';
-import { dummyConversationData } from '@/assets/assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '@/assets/styles/MessagesScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,30 +10,59 @@ import StoriesBar from '@/components/StoriesBar';
 import StoryViewer from '@/components/StoryViewer';
 import ConvoItem from '@/components/Convoitem'
 import { useRouter } from 'expo-router';
+import { api, useApp } from '@/context/AppContext';
 
 export default function MessageScreen() {
-  const [conversations, setConversations] = useState<Conversation[]>([])
+
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedStory, setSelectedStory] = useState<UserStory | null>(null);
-
+  const {setSelectedConversation, conversations, setConversations, selectedConversation } = useApp()
   const router = useRouter()
-  const fetchConversations = () => {
-    setLoading(true)
-    setTimeout(() => {
-      setConversations(dummyConversationData as any)
-      setLoading(false)
-    }, 1000)
-  }
+  // const fetchConversations = () => {
+  //   setLoading(true)
+  //    api.get<{success: boolean; conversations: Conversation[]}>("/api/messages/conversations").then(({data})=>{
+  //    if(data.success) setConversations (data.conversations);
+  //      setLoading(false)
+  //    }).catch(()=>{setTimeout(fetchConversations, 1000)
+  //   })
+
+
+
+  // }
+
+  const fetchConversations = async () => {
+    try {
+      setLoading(true);
+
+      const { data } = await api.get<{
+        success: boolean;
+        conversations: Conversation[];
+      }>("/api/messages/conversations");
+
+      console.log("CONVERSATIONS RESPONSE:", data);
+
+      if (data.success) {
+        setConversations(data.conversations);
+      }
+    } catch (error) {
+      console.error("FETCH CONVERSATIONS ERROR:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     fetchConversations()
   }, [])
+  
   const lowerSearch = search.toLocaleLowerCase()
   const filtered = search ? conversations.filter(
     (c) => c.participant?.name.toLowerCase().includes(lowerSearch) || c.participant?.handle.toLocaleLowerCase().includes(lowerSearch)
   ) : conversations;
 
   const openConvo = (c: Conversation) => {
+
+    setSelectedConversation(c)
     router.push(`/chat/${c._id}`)
   };
 
@@ -88,8 +115,8 @@ export default function MessageScreen() {
       {/* Conversation list */}
 
       {loading ? (
-        <ActivityIndicator style={{ marginTop: 40 }} 
-        color={Colors.primary} />
+        <ActivityIndicator style={{ marginTop: 40 }}
+          color={Colors.primary} />
       ) : (
         <FlatList
           data={filtered}
