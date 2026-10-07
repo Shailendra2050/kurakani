@@ -32,10 +32,10 @@ export const getorCreateConversation = async (req: AuthRequest, res: Response)=>
         conversation = await Conversation.create({participants:[userId,String(targetUserId)]})
         await conversation.populate("participants","name email handle avatar isOnline lastSeen");
     }
-    const other = (conversation.participants as any[]).find((p:any)=> String(p._id !==userId));
+    const other = (conversation.participants as any[]).find((p:any)=> String(p._id) !== userId);
     res.json({
         success:true,
-        conversation:{ _id: conversation._id, participants: other, lastMessage:conversation.lastMessage},
+        conversation:{ _id: conversation._id, participant: other, lastMessage:conversation.lastMessage},
     })
 
 }

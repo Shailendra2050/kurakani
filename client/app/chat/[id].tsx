@@ -45,7 +45,7 @@ export default function Chatscreen() {
     const fetchMessages = () => {
       api.get(`/api/messages/conversations/${id}/messages`).then(({ data }) => {
         if (data.success) {
-          setMessages(data.m.messages);
+          setMessages(data.message);
           setLoading(false)
         }
       }).catch(() => {
@@ -125,7 +125,8 @@ export default function Chatscreen() {
     setSending(true);
     try {
       const formData = new FormData();
-      formData.append("receiverId", partner!._id);
+      formData.append("recieverId", partner!._id);
+      formData.append("conversationId", selectedConversation._id);
       if (text.trim()) formData.append("text", text.trim());
       if (mediaUri) {
         formData.append("file", {
@@ -146,7 +147,7 @@ export default function Chatscreen() {
     } catch (err: any) {
       Alert.alert("Error", err?.response?.data?.message || "Failed to send message");
     } finally {
-      setLoading(false)
+      setSending(false)
     }
   }
 
@@ -334,4 +335,3 @@ export default function Chatscreen() {
     </SafeAreaView>
   )
 }
-

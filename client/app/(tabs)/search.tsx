@@ -21,7 +21,7 @@ export default function search() {
     setLoading(true)
 
     try {
-      const endpoint = search ? `/api/users/search?query=${search}` : "/api/users";
+      const endpoint = search ? `/api/users/search?query=${encodeURIComponent(search)}` : "/api/users";
       const { data } = await api.get<{ success: boolean, users: IUser[] }>
         (endpoint)
       if (data.success) setUsers(data.users)
