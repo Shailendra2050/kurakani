@@ -18,7 +18,7 @@ const ConversationSchema =new Schema<IConversation>({
 ConversationSchema.index({participants:1})
 
 const Conversation: Model<IConversation> = mongoose.model<IConversation>(
-    "Message",
+    "Conversation",
     ConversationSchema
 );
 
