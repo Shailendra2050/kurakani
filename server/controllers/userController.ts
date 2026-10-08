@@ -10,9 +10,36 @@ import { broadcastUserUpdate } from '../socket/socketManager.js';
 
 // Get all users
 export const getUsers = async (req: AuthRequest, res: Response) => {
-    const users = await User.find({ _id: req.user!.id }).select("name email handle avatar bio isOnline lastSeen")
-    res.json({ success: true, users })
+    const page = Number(req.query.page ?? 1);
+    const requestedLimit = Number(req.query.limit ?? 20);
+    if (
+        !Number.isSafeInteger(page) ||
+        page < 1 ||
+        !Number.isSafeInteger(requestedLimit) ||
+        requestedLimit < 1
+    ) {
+        res.status(400).json({ success: false, message: "Invalid pagination parameters" });
+        return;
+    }
 
+    const limit = Math.min(requestedLimit, 100);
+    const skip = (page - 1) * limit;
+    if (!Number.isSafeInteger(skip)) {
+        res.status(400).json({ success: false, message: "Invalid pagination parameters" });
+        return;
+    }
+
+    const users = await User.find({ _id: { $ne: req.user!.id } })
+        .select("name email handle avatar bio isOnline lastSeen")
+        .sort({ _id: 1 })
+        .skip(skip)
+        .limit(limit + 1);
+
+    res.json({
+        success: true,
+        users: users.slice(0, limit),
+        pagination: { page, limit, hasMore: users.length > limit },
+    });
 }
 
 // search users by name,email  or handle

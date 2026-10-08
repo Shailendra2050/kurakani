@@ -41,20 +41,28 @@ export default function Chatscreen() {
   // Load messages for this conversation
   useEffect(() => {
     if (!id) return;
-    setLoading(true)
-    const fetchMessages = () => {
-      api.get(`/api/messages/conversations/${id}/messages`).then(({ data }) => {
+
+    setLoading(true);
+
+    const fetchMessages = async () => {
+      try {
+        const { data } = await api.get<{
+          success: boolean;
+          message: Message[];
+        }>(`/api/messages/conversations/${id}/messages`);
+
         if (data.success) {
           setMessages(data.message);
-          setLoading(false)
         }
-      }).catch(() => {
-        setTimeout(fetchMessages, 1000)
-      })
-    }
-    fetchMessages();
-  }, [id])
+      } catch (error) {
+        setTimeout(fetchMessages, 1000);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchMessages();
+  }, [id]);
 
 
 
@@ -125,7 +133,7 @@ export default function Chatscreen() {
     setSending(true);
     try {
       const formData = new FormData();
-      formData.append("recieverId", partner!._id);
+      formData.append("receieverId", partner!._id);
       formData.append("conversationId", selectedConversation._id);
       if (text.trim()) formData.append("text", text.trim());
       if (mediaUri) {
