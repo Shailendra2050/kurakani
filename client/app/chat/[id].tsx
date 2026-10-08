@@ -145,9 +145,12 @@ export default function Chatscreen() {
 
       const { data } = await api.post<{ success: boolean; message: Message }>
         ("/api/messages/send", formData, { headers: { "Content-Type": "multipart/form-data" } })
+
+
       if (data.success) {
         setMessages((prev) => [...prev, data.message]);
-        const target = { receiverId: partner!._id };
+
+        const target = { receiverId: partner!._id, conversationId: selectedConversation._id, };
         sendWsEvent({ type: "message", ...target, payload: data.message })
         setText("")
         setMediaUri(null)
@@ -160,18 +163,33 @@ export default function Chatscreen() {
   }
 
   const handleTyping = (val: string) => {
-    setText(val)
+    setText(val);
 
-    const target = { receiverId: partner?._id };
+    const target = {
+      receiverId: partner?._id,
+      conversationId: selectedConversation?._id,
+    };
 
-    if (!target.receiverId) return;
-    sendWsEvent({ type: "typing", ...target, isTyping: true });
+    if (!target.receiverId || !target.conversationId) return;
 
-    if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
+    sendWsEvent({
+      type: "typing",
+      ...target,
+      isTyping: true,
+    });
+
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current);
+    }
+
     typingTimerRef.current = setTimeout(() => {
-      sendWsEvent({ type: "typing", ...target, isTyping: false })
-    }, 1500)
-  }
+      sendWsEvent({
+        type: "typing",
+        ...target,
+        isTyping: false,
+      });
+    }, 1500);
+  };
 
   // typing indicator
 
