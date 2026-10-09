@@ -1,8 +1,8 @@
 import { Platform } from "react-native"; 
 
 const Host = Platform.select({
-    ios: "192.168.101.14",
-    android: "192.168.101.14",
+    ios: "10.234.36.226",
+    android: "10.234.36.226",
     default: "localhost"
 });
 
